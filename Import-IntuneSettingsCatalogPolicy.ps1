@@ -14,16 +14,20 @@ Provide the path where the scripts folders are.
 [CmdletBinding()]
     param
     (
-        [parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$GraphToken,
+       [parameter(Mandatory)]
+       [ValidateNotNullOrEmpty()]
+       [string]$GraphToken,
 
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string]$Folder
     )
+
+    $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
+$GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
+
 try {
-    $folders = Get-ChildItem -Path $ScriptsFolder -Directory
+    $folders = Get-ChildItem -Path $folder -Directory
     $headers = @{
         "Content-Type" = "application/json"
         Authorization = "Bearer {0}" -f $GraphToken
