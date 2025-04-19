@@ -14,61 +14,53 @@ Provide the path where the scripts folders are.
 [CmdletBinding()]
     param
     (
-       [parameter(Mandatory)]
-       [ValidateNotNullOrEmpty()]
-       [string]$GraphToken,
+        [parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$GraphToken,
 
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string]$Folder
     )
 
-    $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
-$GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
-
-try {
-    $folders = Get-ChildItem -Path $folder -Directory
     $headers = @{
         "Content-Type" = "application/json"
         Authorization = "Bearer {0}" -f $GraphToken
     }
+
     $apiUrl = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
     $method = "POST"
 
+try {
+    $folders = Get-ChildItem -Path $folder -Directory
+
     foreach ($folder in $folders) {
         try {
-            $policy = Invoke-webrequest -Uri $apiUrl -Method GET -Headers $headers
-            $policyCheck = ($policy.content | Convertfrom-json).value | Where-Object {$_.displayName -eq $folder.Name}
 
-
-            $jsonFile = Get-ChildItem -Path $folder.FullName -File -Filter "*.Json"
-            if ($jsonFile) {
-                Write-Output "File found: $($jsonFile.FullName)"
-                $jsonContent = get-content $jsonFile
+            $json = Get-ChildItem -Path $folder.FullName -File -Filter "*.json" | Select-Object -First 1
+            if ($json) {
+                Write-Host "File found: $($json.FullName)"
 
             } else {
-                Write-Output "No Settings Catalog file found."
+                Write-Error "No policy found."
             }
-
-            $jsonConvert = $jsonContent | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
-            $DisplayName = $jsonConvert.name
+            $jsonConvert = $json | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
             $jsonOutput = $jsonConvert | ConvertTo-Json -Depth 20
 
-            Write-Output "Settings Catalog Policy '$DisplayName' Found..."
-            $jsonOutput
-            Write-Output "Adding Settings Catalog Policy '$DisplayName'"
             Try{
-            Invoke-webrequest -Uri $apiUrl -Method $Method -Headers $headers -Body $jsonOutput
+            Invoke-webrequest -Uri $apiUrl -Method $Method -Headers $headers -Body $body
+            Write-Output "Adding Settings Catalog Policy '$DisplayName'"
+
             }
             Catch{
-                Write-Output "$_"
+                Write-Error "Error adding policy : $_"
             }
         }
         catch {
-            Write-Output "Not able to create policy with name $($folder.name), $_"
+            Write-Error "Not able to create policy with name $($folder.name), $_"
         }
     }
 }
 catch {
-    Write-Output "Not able to run succesfully, $_"
+    Write-Error "Not able to run succesfully, $_"
 }
