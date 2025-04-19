@@ -15,11 +15,12 @@ Function Import-IntuneSettingsCatalogPolicy {
     (
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string]$Folder
-    )
+        [string]$GraphToken,
 
-    $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
-    $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
+        [parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$ScriptsFolder
+    )
 
     $Uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
     $headers = @{
