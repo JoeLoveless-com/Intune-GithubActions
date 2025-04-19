@@ -40,19 +40,16 @@ try {
             $policy = Invoke-webrequest -Uri $apiUrl -Method GET -Headers $headers
             $policyCheck = ($policy.content | Convertfrom-json).value | Where-Object {$_.displayName -eq $folder.Name}
 
-
             $jsonFile = Get-ChildItem -Path $folder.FullName -File -Filter "*.Json"
             if ($jsonFile) {
-                Write-Output "File found: $($jsonFile.FullName)"
+                Write-Output "File found: $($jsonFile.Name)"
                 $jsonContent = get-content $jsonFile
-
+                $jsonConvert = $jsonContent | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
+                $DisplayName = $jsonConvert.name
+                $jsonOutput = $jsonConvert | ConvertTo-Json -Depth 20
             } else {
                 Write-Output "No Settings Catalog file found."
             }
-
-            $jsonConvert = $jsonContent | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
-            $DisplayName = $jsonConvert.name
-            $jsonOutput = $jsonConvert | ConvertTo-Json -Depth 20
 
             Write-Output "Settings Catalog Policy '$DisplayName' Found..."
             $jsonOutput
