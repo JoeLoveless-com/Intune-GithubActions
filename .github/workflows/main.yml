@@ -1,4 +1,4 @@
-name: Manage Intune Device Health Scripts
+name: aManage Intune Device Health Scripts
 on:
   workflow_dispatch:
   push:
