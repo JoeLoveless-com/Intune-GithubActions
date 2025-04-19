@@ -26,4 +26,4 @@ jobs:
       - name: Import Intune Settings Catalog
         shell: pwsh
         run: |
-           "${{ github.workspace }}\Intune-GithubActions\import-intunesettingscatalogpolicy.ps1" -folder "${{ github.workspace }}\Intune-GithubActions\SettingsCatalog"
+           '${{ github.workspace }}\Intune-GithubActions\import-intunesettingscatalogpolicy.ps1' -folder '${{ github.workspace }}\Intune-GithubActions\SettingsCatalog'
