@@ -1,4 +1,4 @@
-name: aManage Intune Device Health Scripts
+name: Import Intune Settings Catalog
 on:
   workflow_dispatch:
   push:
@@ -28,8 +28,8 @@ jobs:
         run: |
           $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
           $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
-          Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"
-      - name: Manage Device Health scripts
+          Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"          
+      - name: Import Intune Settings Catalog
         shell: pwsh
         run: |
-          .\manage-devicehealthscripts.ps1 -GraphToken $env:GRAPH_TOKEN -ScriptsFolder .\RemediationScripts
+          .\import-intunesettingscatalog.ps1 -GraphToken $env:GRAPH_TOKEN -ScriptsFolder .\SettingsCatalog          
