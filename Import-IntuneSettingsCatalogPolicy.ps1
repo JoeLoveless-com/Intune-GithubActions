@@ -1,16 +1,17 @@
-Function Import-IntuneSettingsCatalogPolicy {
-    <#
-    .SYNOPSIS
-    Import .JSON of a settings catalog policy to Intune.
-    .DESCRIPTION
-    Import .JSON of a settings catalog policy to Intune. No assignments will be created.
-    .EXAMPLE
-    Import-IntuneSettingsCatalogPolicy
-    .NOTES
-    https://github.com/microsoftgraph/powershell-intune-samples/blob/master/SettingsCatalog/SettingsCatalog_Import_FromJSON.ps1
-    #>
-
-    [CmdletBinding()]
+<#
+.SYNOPSIS
+Creates (or updates if exist) device health scripts in Intune.
+.DESCRIPTION
+This script searches in a provided folder for subfolders where the scripts are in. 
+The script name is the name of the folder where the script set is in. In the script set folder there must be a detection_xx.ps1 and remediate_xx.ps1
+.PARAMETER GraphToken
+Enter the Graph Bearer token
+.PARAMETER ScriptsFolder
+Provide the path where the scripts folders are.
+.EXAMPLE
+.\manage-devicehealthscripts.ps1 -GraphToken xxxx -ScriptsFolder .\AllDetectionScripts
+#>
+[CmdletBinding()]
     param
     (
         [parameter(Mandatory)]
@@ -21,53 +22,44 @@ Function Import-IntuneSettingsCatalogPolicy {
         [ValidateNotNullOrEmpty()]
         [string]$Folder
     )
-
-    $Uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
+try {
+    $folders = Get-ChildItem -Path $ScriptsFolder -Directory
     $headers = @{
         "Content-Type" = "application/json"
-        Authorization  = "Bearer {0}" -f $GraphToken
+        Authorization = "Bearer {0}" -f $GraphToken
     }
+    $apiUrl = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
+    $method = "POST"
 
-    #Declarations
-    $date = Get-Date -Format yyyyMMdd-HHmm
-    $logfile = "$Outputdir\Import-IntuneSettingsCatalogPolicy-$date.log"
+    foreach ($folder in $folders) {
+        try {
+            $policy = Invoke-webrequest -Uri $apiUrl -Method GET -Headers $headers
+            $policyCheck = ($policy.content | Convertfrom-json).value | Where-Object {$_.displayName -eq $folder.Name}
 
-    #region Get Json files
-    try {
-        $jsonFiles = Get-ChildItem -Path $folder -filter *.json
-        Write-Output "Gathering JSON files from $folder"
-    }
-    Catch {
-        Write-Error "Unable to find JSON files in $folder"
-        break
-    }
 
-    if ($jsonFiles) {
-        Write-Output "JSON Files found: $jsonFiles.Name"
-    }
-    if (!$jsonFiles) {
-        Write-Error "No JSON Files found"
-        Stop
-    }
-    #endRegion
+            $jsonFile = Get-ChildItem -Path $folder.FullName -File -Filter "*.Json"
+            if ($jsonFile) {
+                Write-Host "File found: $($jsonFile.FullName)"
+                $jsonContent = get-content $jsonFile
 
-    Foreach ($item in $jsonFiles) {
-        Try {
-            Invoke-webrequest -Uri $Uri -Method POST -Headers $headers -Body $item
+            } else {
+                Write-Warning "No Settings Catalog file found."
+            }
+
+            $jsonConvert = $jsonContent | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
+            $DisplayName = $jsonConvert.name
+            $jsonOutput = $jsonConvert | ConvertTo-Json -Depth 20
+
+            Write-Output "Settings Catalog Policy '$DisplayName' Found..."
+            $jsonOutput
+            Write-Output "Adding Settings Catalog Policy '$DisplayName'"
+            Invoke-webrequest -Uri $apiUrl -Method $Method -Headers $headers -Body $jsonOutput
         }
-        Catch {
-            $ex = $_.Exception
-            $errorResponse = $ex.Response.GetResponseStream()
-            $reader = New-Object System.IO.StreamReader($errorResponse)
-            $reader.BaseStream.Position = 0
-            $reader.DiscardBufferedData()
-            $responseBody = $reader.ReadToEnd();
-            Write-Host "Response content:`n$responseBody" -f Red
-            Write-Error "Request to $Uri failed with HTTP Status $($ex.Response.StatusCode) $($ex.Response.StatusDescription)"
-            write-host
-            break
-
+        catch {
+            Write-Error "Not able to create policy with name $($folder.name), $_"
         }
     }
 }
-            
+catch {
+    Write-Error "Not able to run succesfully, $_"
+}
