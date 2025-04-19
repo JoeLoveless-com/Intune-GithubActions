@@ -43,11 +43,11 @@ try {
 
             $jsonFile = Get-ChildItem -Path $folder.FullName -File -Filter "*.Json"
             if ($jsonFile) {
-                Write-Host "File found: $($jsonFile.FullName)"
+                Write-Output "File found: $($jsonFile.FullName)"
                 $jsonContent = get-content $jsonFile
 
             } else {
-                Write-Warning "No Settings Catalog file found."
+                Write-Output "No Settings Catalog file found."
             }
 
             $jsonConvert = $jsonContent | ConvertFrom-Json | Select-Object -Property * -ExcludeProperty id, createdDateTime, lastModifiedDateTime, version, supportsScopeTags
@@ -57,13 +57,18 @@ try {
             Write-Output "Settings Catalog Policy '$DisplayName' Found..."
             $jsonOutput
             Write-Output "Adding Settings Catalog Policy '$DisplayName'"
+            Try{
             Invoke-webrequest -Uri $apiUrl -Method $Method -Headers $headers -Body $jsonOutput
+            }
+            Catch{
+                Write-Output "$_"
+            }
         }
         catch {
-            Write-Error "Not able to create policy with name $($folder.name), $_"
+            Write-Output "Not able to create policy with name $($folder.name), $_"
         }
     }
 }
 catch {
-    Write-Error "Not able to run succesfully, $_"
+    Write-Output "Not able to run succesfully, $_"
 }
