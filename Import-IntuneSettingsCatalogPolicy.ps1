@@ -19,7 +19,7 @@ Function Import-IntuneSettingsCatalogPolicy {
 
         [parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string]$ScriptsFolder
+        [string]$Folder
     )
 
     $Uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
