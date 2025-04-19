@@ -32,4 +32,4 @@ jobs:
       - name: Import Intune Settings Catalog
         shell: pwsh
         run: |
-          .\import-intunesettingscatalog.ps1 -GraphToken $env:GRAPH_TOKEN -ScriptsFolder .\SettingsCatalog          
+          .\import-intunesettingscatalogpolicy.ps1 -GraphToken $env:GRAPH_TOKEN -folder .\SettingsCatalog          
