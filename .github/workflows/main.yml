@@ -23,6 +23,12 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
           enable-AzPSSession: true
+      - name: Install Microsoft.Graph.Authentication
+        shell: pwsh
+        run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+            Install-Module "Microsoft.Graph.Authentication"
+            Get-Module "Microsoft.Graph.Authentication" -ListAvailable
       - name: Azure CLI script
         uses: azure/cli@v2
         with:
