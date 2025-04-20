@@ -26,9 +26,9 @@ jobs:
       - name: Get Graph API Token
         shell: pwsh
         run: |
-            $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
-            $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
-            Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"
+          $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
+          $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
+          Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"
       - name: Import Intune Settings Catalog Policies
         shell: pwsh
         run: |
