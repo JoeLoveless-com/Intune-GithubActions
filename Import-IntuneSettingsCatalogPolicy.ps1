@@ -1,6 +1,4 @@
 function Import-IntuneSettingsCatalogPolicy {
-
-
     [CmdletBinding()]
     param
     (
@@ -10,7 +8,7 @@ function Import-IntuneSettingsCatalogPolicy {
     )
 
     #Variables
-    $scopes = "DeviceManagementConfiguration.ReadWrite.All"
+    #$scopes = "DeviceManagementConfiguration.ReadWrite.All"
     $policyfiles = Get-ChildItem $folder | Select-Object -ExpandProperty Name
 
     Foreach ($policyfile in $policyfiles) {
