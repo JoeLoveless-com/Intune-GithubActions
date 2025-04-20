@@ -23,13 +23,19 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
           enable-AzPSSession: true
+      - name: Get Graph API Token
+        shell: pwsh
+        run: |
+            $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
+            $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
+            Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"
       - name: Install Microsoft.Graph.Authentication
         shell: pwsh
         run: |
             Set-PSRepository PSGallery -InstallationPolicy Trusted
             Install-Module "Microsoft.Graph.Authentication"
             Get-Module "Microsoft.Graph.Authentication" -ListAvailable
-            Connect-MgGraph -AccessToken $env:ACCESS_TOKEN
+            Connect-MgGraph -AccessToken $env:GRAPH_TOKEN
             Invoke-MgGraphRequest -Uri '/beta/organization' | Select-Object -ExpandProperty value
       - name: Import Intune Settings Catalog Policies
         shell: pwsh
