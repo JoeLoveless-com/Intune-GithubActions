@@ -10,26 +10,34 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  call-graph-api:
     runs-on: ubuntu-latest
     environment: GraphApi
     steps:
-    - name: Azure login
-      uses: azure/login@v2
-      with:
-        auth-type: IDENTITY
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        allow-no-subscriptions: true
-        enable-AzPSSession: true
-    - name: Install Microsoft.Graph.Authentication
-      shell: pwsh
-      run: |
-        Set-PSRepository PSGallery -InstallationPolicy Trusted
-        Install-Module "Microsoft.Graph.Authentication"
-        Get-Module "Microsoft.Graph.Authentication" -ListAvailable
-        Connect-MgGraph -Identity
-        Invoke-MgGraphRequest -Uri '/beta/organization' | Select-Object -ExpandProperty value
-    - name: Import Intune Settings Catalog Policies
-      shell: pwsh
-      run: |
-        .\Import-IntuneSettingsCatalogPolicy.ps1 -Folder .\SettingsCatalog
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+          enable-AzPSSession: true
+      - name: Get Graph API Token
+        shell: pwsh
+        run: |
+            $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
+            $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
+            Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$GraphToken"
+      - name: Install Microsoft.Graph.Authentication
+        shell: pwsh
+        run: |
+            Set-PSRepository PSGallery -InstallationPolicy Trusted
+            Install-Module "Microsoft.Graph.Authentication"
+            Get-Module "Microsoft.Graph.Authentication" -ListAvailable
+            Connect-MgGraph -AccessToken $env:ACCESS_TOKEN
+            Invoke-MgGraphRequest -Uri '/beta/organization' | Select-Object -ExpandProperty value
+      - name: Import Intune Settings Catalog Policies
+        shell: pwsh
+        run: |
+          .\Import-IntuneSettingsCatalogPolicy.ps1 -GraphToken $env:GRAPH_TOKEN -Folder .\SettingsCatalog
