@@ -1,4 +1,3 @@
-function Import-IntuneSettingsCatalogPolicy {
     [CmdletBinding()]
     param
     (
@@ -28,4 +27,3 @@ function Import-IntuneSettingsCatalogPolicy {
             Write-Host $_
         }
     }
-}
