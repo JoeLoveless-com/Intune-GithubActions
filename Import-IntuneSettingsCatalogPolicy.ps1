@@ -26,8 +26,7 @@ function Import-IntuneSettingsCatalogPolicy {
 
         Try {
             $policy = Get-Content -path $folder\$policyfile
-            Invoke-MgGraphRequest -Method POST https://graph.microsoft.com/beta/deviceManagement/configurationPolicies -ContentType "application/json" -Body $policy -headers $headers
-            
+            Invoke-webrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Headers $headers -Body $policy -ContentType "application/json"
         }
         Catch {
             Write-Host "there was an error importing $policyfile"
