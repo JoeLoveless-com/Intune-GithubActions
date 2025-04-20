@@ -29,13 +29,7 @@ jobs:
             Set-PSRepository PSGallery -InstallationPolicy Trusted
             Install-Module "Microsoft.Graph.Authentication"
             Get-Module "Microsoft.Graph.Authentication" -ListAvailable
-      - name: Azure CLI script
-        uses: azure/cli@v2
-        with:
-          azcliversion: latest
-          inlineScript: |
-              az account show
-              Connect-MgGraph -identity -nowelcome       
+            Connect-MgGraph -identity -nowelcome
       - name: Import Intune Settings Catalog Policies
         shell: pwsh
         run: |
