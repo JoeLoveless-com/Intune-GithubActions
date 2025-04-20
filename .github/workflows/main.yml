@@ -24,6 +24,7 @@ jobs:
           allow-no-subscriptions: true
           enable-AzPSSession: true
       - name: Install Microsoft.Graph.Authentication
+        shell: pwsh
         run: |
             Install-Module "Microsoft.Graph.Authentication"
             Connect-MgGraph -AccessToken $env:ACCESS_TOKEN
