@@ -35,7 +35,7 @@ jobs:
             Set-PSRepository PSGallery -InstallationPolicy Trusted
             Install-Module "Microsoft.Graph.Authentication"
             Get-Module "Microsoft.Graph.Authentication" -ListAvailable
-            Connect-MgGraph -AccessToken $env:ACCESS_TOKEN
+            Connect-MgGraph -AccessToken $env:GRAPH_TOKEN
             Invoke-MgGraphRequest -Uri '/beta/organization' | Select-Object -ExpandProperty value
       - name: Import Intune Settings Catalog Policies
         shell: pwsh
