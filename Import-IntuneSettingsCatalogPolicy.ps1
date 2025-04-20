@@ -15,11 +15,6 @@ function Import-IntuneSettingsCatalogPolicy {
         Authorization = "Bearer {0}" -f $GraphToken
     }
 
-    Set-PSRepository PSGallery -InstallationPolicy Trusted
-    Install-Module "Microsoft.Graph.Authentication"
-    Get-Module "Microsoft.Graph.Authentication" -ListAvailable
-    Connect-MgGraph -AccessToken $GraphToken
-
     $policyfiles = Get-ChildItem $folder | Select-Object -ExpandProperty Name
 
     Foreach ($policyfile in $policyfiles) {
