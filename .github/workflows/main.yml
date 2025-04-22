@@ -29,9 +29,10 @@ jobs:
           $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
           $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
           $secureToken = ConvertTo-SecureString -String $GraphToken -AsPlainText
+          Add-Content -Path $env:GITHUB_ENV -Value "GRAPH_TOKEN=$secureToken"
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module "Microsoft.Graph.Authentication"
-          Connect-MgGraph -AccessToken $secureToken
+          Connect-MgGraph -AccessToken $env:GRAPH_TOKEN
       - name: Import Intune Settings Catalog Policies
         shell: pwsh
         run: |
