@@ -6,7 +6,6 @@ param
     [string]$folder
 )
 
-Connect-MgGraph -AccessToken $env:GRAPH_TOKEN
 
 $policyfiles = Get-ChildItem $folder | Select-Object -ExpandProperty Name
 
