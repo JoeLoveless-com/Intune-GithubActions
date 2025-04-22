@@ -6,6 +6,8 @@ param
     [string]$folder
 )
 
+Connect-MgGraph -AccessToken $secureToken
+
 $policyfiles = Get-ChildItem $folder | Select-Object -ExpandProperty Name
 
 Foreach ($policyfile in $policyfiles){
