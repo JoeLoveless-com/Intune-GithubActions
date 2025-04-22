@@ -28,10 +28,7 @@ jobs:
         run: |
           $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
           $GraphToken = ($GraphTokenResponse | ConvertFrom-Json).accessToken
-      - name: Connect to Graph with Token
-        shell: pwsh
-        run: |
-          $secureToken = ConvertTo-SecureString -String $graphtoken -AsPlainText
+          $secureToken = ConvertTo-SecureString -String $GraphToken -AsPlainText
           Set-PSRepository PSGallery -InstallationPolicy Trusted
           Install-Module "Microsoft.Graph.Authentication"
           Connect-MgGraph -AccessToken $secureToken
