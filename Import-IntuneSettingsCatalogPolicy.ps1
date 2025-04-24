@@ -22,6 +22,6 @@ Foreach ($policyfile in $policyfiles){
         }
         if (!$policyCheck.Name){
             Write-Host "$($policyCheck.Name) does not exist, creating new profile"
-            Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "applilcation/json"
+            Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "application/json"
     }
 }
