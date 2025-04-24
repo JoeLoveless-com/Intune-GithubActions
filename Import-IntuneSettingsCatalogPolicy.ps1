@@ -18,10 +18,10 @@ Foreach ($policyfile in $policyfiles){
 
         if ($policyCheck.Name){
         Write-Host "$($policyCheck.Name) already exists, modifying profile with PUT"
-        Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($policyCheck.Id)" -Method PUT -Body $policy -ContentType "application/json"
+        $put = Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($policyCheck.Id)" -Method PUT -Body $policy -ContentType "application/json"
         }
-        if (!$policyCheck.Name){
-            Write-Host "$($policyCheck.Name) does not exist, creating new profile"
-            Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "application/json"
+        else{
+            Write-Host "$policybaseName does not exist, creating new profile"
+            $post = Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "application/json"
     }
 }
