@@ -7,23 +7,21 @@ param
 )
 
 
-$policyfiles = Get-ChildItem $folder | Select-Object -ExpandProperty Name
+$policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
 Foreach ($policyfile in $policyfiles){
-    try{
-        $policy = Get-Content -path $folder\$policyfile
-        $policyCheck = (Invoke-Mggraphrequest -uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method GET).value
+    $policyName = $policyfile.Name
+    $policybaseName = $policyfile.BaseName
 
-        #if ($policyCheck.Name -gt 0){
-        #Write-Host "$($policyCheck.Name) already exists, patching profile"
-        #Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method PATCH -Body $policy
-        #}
-        #if (!$policyCheck.Name -lt 1){
+        $policy = Get-Content -path $folder\$policyName
+        $policyCheck = (Invoke-Mggraphrequest -uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method GET).value | Where-Object { $_.Name -eq $policyBaseName }
+
+        if ($policyCheck.Name){
+        Write-Host "$($policyCheck.Name) already exists, modifying profile with PUT"
+        Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($policyCheck.Id)" -Method PUT -Body $policy -ContentType "application/json"
+        }
+        if (!$policyCheck.Name){
             Write-Host "$($policyCheck.Name) does not exist, creating new profile"
-            Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy
-        #}
-}
-Catch{
-    Write-Error "Error: $_"
-}
+            Invoke-Mggraphrequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "applilcation/json"
+    }
 }
