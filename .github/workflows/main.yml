@@ -23,7 +23,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           allow-no-subscriptions: true
           enable-AzPSSession: true
-      - name: Get Graph API Token
+      - name: Import Intune Settings Catalog Policy
         shell: pwsh
         run: |
           $GraphTokenResponse = az account get-access-token --resource https://graph.microsoft.com
