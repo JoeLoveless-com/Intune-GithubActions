@@ -6,6 +6,7 @@ param
     [string]$folder
 )
 
+
 $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
 Foreach ($policyfile in $policyfiles){
@@ -24,7 +25,7 @@ Foreach ($policyfile in $policyfiles){
     } while ($uri)
 
     $existingPolicy = $policyCheck | Where-Object { $_.Name -eq $policyBaseName }
-
+}
     if ($existingPolicy){
         Write-Host "$($existingPolicy.Name) already exists, modifying profile with PUT"
         Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($existingPolicy.Id)" -Method PUT -Body $policy -ContentType "application/json"
