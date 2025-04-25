@@ -6,7 +6,6 @@ param
     [string]$folder
 )
 
-# Fetch all existing policies just once
 $policyCheck = @()
 $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
 do {
@@ -17,13 +16,11 @@ do {
     $uri = $response.'@odata.nextLink'
 } while ($uri)
 
-# Output all existing policies once
 Write-Host "Existing Policies Found:"
 $policyCheck | ForEach-Object { Write-Host $_.Name }
 
 $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
-# Loop through policy files
 Foreach ($policyfile in $policyfiles){
     $policyName = $policyfile.Name
     $policybaseName = $policyfile.BaseName
