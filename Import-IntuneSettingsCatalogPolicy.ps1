@@ -1,36 +1,44 @@
 [CmdletBinding()]
-param
-(
+param (
     [parameter(Mandatory)]
     [ValidateNotNullOrEmpty()]
     [string]$folder
 )
 
-
 $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
-Foreach ($policyfile in $policyfiles){
+foreach ($policyfile in $policyfiles) {
     $policyName = $policyfile.Name
-    $policybaseName = $policyfile.BaseName
-    $policy = Get-Content -Path "$folder\$policyName"
+    $policyBaseName = $policyfile.BaseName
+    $policyRaw = Get-Content -Path "$folder\$policyName" -Raw
+
+    # Convert to PowerShell object
+    $policyObj = $policyRaw | ConvertFrom-Json
+
+    # Remove problematic navigation annotations
+    $policyObj.PSObject.Properties.Remove('settingDefinitions@odata.associationLink')
+
+    # Convert back to JSON
+    $policyJson = $policyObj | ConvertTo-Json -Depth 10
+
     $policyCheck = @()
     $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
-    
+
     do {
         $response = Invoke-MgGraphRequest -Uri $uri -Method GET
         $policyCheck += $response.value
 
-        #pagination
+        # Pagination
         $uri = $response.'@odata.nextLink'
     } while ($uri)
 
     $existingPolicy = $policyCheck | Where-Object { $_.Name -eq $policyBaseName }
-}
-    if ($existingPolicy){
+
+    if ($existingPolicy) {
         Write-Host "$($existingPolicy.Name) already exists, modifying profile with PUT"
-        Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($existingPolicy.Id)" -Method PUT -Body $policy -ContentType "application/json"
+        Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies/$($existingPolicy.Id)" -Method PUT -Body $policyJson -ContentType "application/json"
+    } else {
+        Write-Host "$policyBaseName does not exist, creating new profile"
+        Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policyJson -ContentType "application/json"
     }
-    else{
-        Write-Host "$policybaseName does not exist, creating new profile"
-        Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "application/json"
-    }
+}
