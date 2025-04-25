@@ -1,4 +1,3 @@
-#Joe
 [CmdletBinding()]
 param
 (
@@ -7,28 +6,31 @@ param
     [string]$folder
 )
 
+# Fetch all existing policies just once
+$policyCheck = @()
+$uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
+do {
+    $response = Invoke-MgGraphRequest -Uri $uri -Method GET
+    $policyCheck += $response.value
+
+    # Pagination handling
+    $uri = $response.'@odata.nextLink'
+} while ($uri)
+
+# Output all existing policies once
+Write-Host "Existing Policies Found:"
+$policyCheck | ForEach-Object { Write-Host $_.Name }
+
 $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
+# Loop through policy files
 Foreach ($policyfile in $policyfiles){
     $policyName = $policyfile.Name
     $policybaseName = $policyfile.BaseName
 
     $policy = Get-Content -Path "$folder\$policyName" -Raw
 
-    $policyCheck = @()
-    $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
-    
-    do {
-        $response = Invoke-MgGraphRequest -Uri $uri -Method GET
-        $policyCheck += $response.value
-
-        #pagination
-        $uri = $response.'@odata.nextLink'
-    } while ($uri)
-
-    Write-Host "Existing Policies Found:"
-    $policyCheck | ForEach-Object { Write-Host $_.Name }
-
+    # Check if the policy already exists
     $existingPolicy = $policyCheck | Where-Object { $_.Name -ieq $policybaseName }
 
     if ($existingPolicy){
