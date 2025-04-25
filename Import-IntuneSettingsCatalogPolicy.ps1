@@ -34,4 +34,3 @@ Foreach ($policyfile in $policyfiles){
         Write-Host "$policybaseName does not exist, creating new profile"
         Invoke-MgGraphRequest -Uri "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies" -Method POST -Body $policy -ContentType "application/json"
     }
-}
