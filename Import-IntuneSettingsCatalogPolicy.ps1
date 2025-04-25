@@ -6,7 +6,6 @@ param
     [string]$folder
 )
 
-
 $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 
 Foreach ($policyfile in $policyfiles){
@@ -24,7 +23,12 @@ Foreach ($policyfile in $policyfiles){
         $uri = $response.'@odata.nextLink'
     } while ($uri)
 
-    $existingPolicy = $policy | Where-Object { $_.Name -eq $policyBaseName }
+    # Debugging step: Print out retrieved policy names
+    Write-Host "Existing Policies Found:"
+    $policyCheck | ForEach-Object { Write-Host $_.Name }
+
+    # Case-insensitive comparison to ensure matches are found
+    $existingPolicy = $policyCheck | Where-Object { $_.Name -ieq $policyBaseName }
 
     if ($existingPolicy){
         Write-Host "$($existingPolicy.Name) already exists, modifying profile with PUT"
