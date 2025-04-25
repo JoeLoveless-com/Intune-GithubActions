@@ -11,7 +11,9 @@ $policyfiles = Get-ChildItem $folder | Select-Object Name, BaseName
 Foreach ($policyfile in $policyfiles){
     $policyName = $policyfile.Name
     $policybaseName = $policyfile.BaseName
-    $policy = Get-Content -Path "$folder\$policyName"
+
+    $policy = Get-Content -Path "$folder\$policyName" -Raw
+
     $policyCheck = @()
     $uri = "https://graph.microsoft.com/beta/deviceManagement/configurationPolicies"
     
@@ -23,12 +25,10 @@ Foreach ($policyfile in $policyfiles){
         $uri = $response.'@odata.nextLink'
     } while ($uri)
 
-    # Debugging step: Print out retrieved policy names
     Write-Host "Existing Policies Found:"
     $policyCheck | ForEach-Object { Write-Host $_.Name }
 
-    # Case-insensitive comparison to ensure matches are found
-    $existingPolicy = $policyCheck | Where-Object { $_.Name -ieq $policyBaseName }
+    $existingPolicy = $policyCheck | Where-Object { $_.Name -ieq $policybaseName }
 
     if ($existingPolicy){
         Write-Host "$($existingPolicy.Name) already exists, modifying profile with PUT"

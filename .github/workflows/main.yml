@@ -2,8 +2,8 @@ name: Import Intune Settings Catalog Policies
 on:
   workflow_dispatch:
   push:
-    paths:
-    - '**.json'
+    branches:
+      - main
 
 permissions:
   id-token: write
